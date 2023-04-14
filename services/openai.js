@@ -2,6 +2,7 @@ import axios from 'axios';
 import FormData from 'form-data';
 import config from '../config/index.js';
 import { handleFulfilled, handleRejected, handleRequest } from './utils/index.js';
+import { OpenAIStream } from './openai_stream.js';
 
 export const ROLE_SYSTEM = 'system';
 export const ROLE_AI = 'assistant';
@@ -37,21 +38,28 @@ client.interceptors.response.use(handleFulfilled, (err) => {
   return handleRejected(err);
 });
 
-const createChatCompletion = ({
+const createChatCompletion = async ({
   model = config.OPENAI_COMPLETION_MODEL,
   messages,
   temperature = config.OPENAI_COMPLETION_TEMPERATURE,
   maxTokens = config.OPENAI_COMPLETION_MAX_TOKENS,
   frequencyPenalty = config.OPENAI_COMPLETION_FREQUENCY_PENALTY,
   presencePenalty = config.OPENAI_COMPLETION_PRESENCE_PENALTY,
-}) => client.post('/v1/chat/completions', {
-  model,
-  messages,
-  temperature,
-  max_tokens: maxTokens,
-  frequency_penalty: frequencyPenalty,
-  presence_penalty: presencePenalty,
-});
+}) => {
+  const payload = {
+    model,
+    messages,
+    temperature,
+    max_tokens: maxTokens,
+    frequency_penalty: frequencyPenalty,
+    presence_penalty: presencePenalty,
+    stream: true,
+    n: 1,
+  };
+
+  const stream = await OpenAIStream(payload);
+  return stream;
+};
 
 const createTextCompletion = ({
   model = config.OPENAI_COMPLETION_MODEL,
