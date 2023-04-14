@@ -7,12 +7,12 @@ import {
 
 export type ChatGPTAgent = "user" | "system";
 
-export interface ChatGPTMessage {
+module.exports = interface ChatGPTMessage {
   role: ChatGPTAgent;
   content: string;
 }
 
-export interface OpenAIStreamPayload {
+module.exports = interface OpenAIStreamPayload {
   model: string;
   messages: ChatGPTMessage[];
   temperature: number;
